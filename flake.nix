@@ -1,5 +1,5 @@
 {
-  description = "thing: stuff and things";
+  description = "fass: stuff and fass";
 
   inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
 
@@ -14,22 +14,23 @@
       nixpkgsFor = forAllSystems (system: import nixpkgs { inherit system; });
     in
     {
-      overlay = _: prev: { inherit (self.packages.${prev.system}) thing; };
+      overlay = _: prev: { inherit (self.packages.${prev.system}) fass; };
 
       packages = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};
         in
         {
-          thing = with pkgs; pkgs.buildGoModule {
-            pname = "thing";
+          fass = with pkgs; pkgs.buildGoModule rec {
+            pname = "fass";
             version = "v0.0.0";
             src = ./.;
 
-            vendorHash = pkgs.lib.fakeSha256;
+            vendorHash = "sha256-RY8ExxmgfKdEcmV8FLM8mhr/CKAL3pPjgzW7zR1HCv4=";
 
             nativeBuildInputs = [ pkg-config copyDesktopItems ];
             buildInputs = [
+              fyne
               glfw
               libGL
               libGLU
@@ -44,18 +45,20 @@
               xorg.xinput
             ];
 
-            desktopItems = [
-              (makeDesktopItem {
-                name = "traygent";
-                exec = pname;
-                icon = pname;
-                desktopName = pname;
-              })
-            ];
+            buildPhase = ''
+              ${fyne}/bin/fyne package
+            '';
+
+            installPhase = ''
+                mkdir -p $out
+                pkg="$PWD/${pname}.tar.xz"
+                cd $out
+                tar --strip-components=1 -xvf $pkg
+             '';
           };
         });
 
-      defaultPackage = forAllSystems (system: self.packages.${system}.thing);
+      defaultPackage = forAllSystems (system: self.packages.${system}.fass);
       devShells = forAllSystems (system:
         let
           pkgs = nixpkgsFor.${system};

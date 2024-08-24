@@ -2,6 +2,6 @@ Website = "https://github.com/qbit/fass"
 
 [Details]
 Icon = "toggleswitch.png"
-Name = "FyneHome"
+Name = "fass"
 ID = "dev.suah.fass"
 Version = "1.0.0"
