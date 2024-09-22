@@ -1,7 +1,8 @@
 Website = "https://github.com/qbit/fass"
 
 [Details]
-Icon = "toggleswitch.png"
-Name = "fass"
-ID = "dev.suah.fass"
-Version = "1.0.0"
+  Icon = "toggleswitch.png"
+  Name = "fass"
+  ID = "dev.suah.fass"
+  Version = "1.0.0"
+  Build = 5

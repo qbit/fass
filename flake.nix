@@ -26,7 +26,7 @@
             version = "v0.0.0";
             src = ./.;
 
-            vendorHash = "sha256-RY8ExxmgfKdEcmV8FLM8mhr/CKAL3pPjgzW7zR1HCv4=";
+            vendorHash = "sha256-gyY6JQn2r23Gwh0Dop5BoBT7TbZIxM2Ed+sC+yqTzDQ=";
 
             nativeBuildInputs = [ pkg-config copyDesktopItems ];
             buildInputs = [
@@ -73,7 +73,7 @@
             buildInputs = with pkgs; [
               fyne
               git
-              go_1_21
+              go
               gopls
               go-tools
               glxinfo

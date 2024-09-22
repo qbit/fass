@@ -1,9 +1,13 @@
 package main
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
 	"log"
+	"net/http"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -71,20 +75,23 @@ func makeEntity(e hass.State, h *hass.Access) *widget.Card {
 	))
 }
 
-func loadSavedData(a fyne.App, input *widget.Entry, file string) {
+func loadSavedData(a fyne.App, w fyne.Window, input *widget.Entry, file string) {
 	uri, err := storage.Child(a.Storage().RootURI(), file)
 	if err != nil {
+		dialog.ShowError(err, w)
 		return
 	}
 
 	reader, err := storage.Reader(uri)
 	if err != nil {
+		dialog.ShowError(err, w)
 		return
 	}
 	defer reader.Close()
 
 	content, err := io.ReadAll(reader)
 	if err != nil {
+		dialog.ShowError(err, w)
 		return
 	}
 
@@ -126,15 +133,39 @@ func main() {
 	haExists, _ := storage.Exists(haFile)
 	tokenFile, _ := storage.Child(a.Storage().RootURI(), "hatoken")
 	tkExists, _ := storage.Exists(tokenFile)
+	certFile, _ := storage.Child(a.Storage().RootURI(), "haCAcert")
+	certExists, _ := storage.Exists(certFile)
 
 	urlEntry := widget.NewEntry()
 	passEntry := widget.NewPasswordEntry()
+	certEntry := widget.NewMultiLineEntry()
 
-	loadSavedData(a, urlEntry, "haurl")
-	loadSavedData(a, passEntry, "hatoken")
+	loadSavedData(a, w, urlEntry, "haurl")
+	loadSavedData(a, w, passEntry, "hatoken")
+	loadSavedData(a, w, certEntry, "haCAcert")
 
 	h := hass.NewAccess(urlEntry.Text, "")
 	if haExists && tkExists {
+		if certExists {
+			rootCAs, _ := x509.SystemCertPool()
+			if rootCAs == nil {
+				rootCAs = x509.NewCertPool()
+			}
+
+			if ok := rootCAs.AppendCertsFromPEM([]byte(certEntry.Text)); !ok {
+				dialog.ShowError(fmt.Errorf("No certs appended, using system certs only"), w)
+			}
+
+			client := &http.Client{
+				Timeout: time.Second * 10,
+				Transport: &http.Transport{
+					TLSClientConfig: &tls.Config{
+						RootCAs: rootCAs,
+					},
+				},
+			}
+			h.SetClient(client)
+		}
 		h.SetBearerToken(passEntry.Text)
 		err := h.CheckAPI()
 		if err != nil {
@@ -148,9 +179,11 @@ func main() {
 		Items: []*widget.FormItem{
 			{Text: "Home Assistant URL:", Widget: urlEntry},
 			{Text: "Access Token:", Widget: passEntry},
+			{Text: "CA Certificate:", Widget: certEntry},
 			{Text: "", Widget: widget.NewButton("Save", func() {
 				saveData(a, w, urlEntry, "haurl")
 				saveData(a, w, passEntry, "hatoken")
+				saveData(a, w, certEntry, "haCAcert")
 			})},
 		},
 	}
