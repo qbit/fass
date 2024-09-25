@@ -4,6 +4,7 @@ A simple [[https://fyne.io/][Fyne]] app for controlling lights and switches in y
 install.
 
 #+attr_html: :width 100px
+#+ATTR_ORG: :width 100px
 [[file:toggleswitch.png]]
 
 
