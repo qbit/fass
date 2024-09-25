@@ -33,13 +33,17 @@ func loadData(h *hass.Access, lightCards *[]fyne.CanvasObject, switchCards *[]fy
 	for entity := range lights {
 		e := lights[entity]
 		card := makeEntity(e, h)
-		*lightCards = append(*lightCards, card)
+		if card != nil {
+			*lightCards = append(*lightCards, card)
+		}
 	}
 
 	for entity := range switches {
 		e := switches[entity]
 		card := makeEntity(e, h)
-		*switchCards = append(*switchCards, card)
+		if card != nil {
+			*switchCards = append(*switchCards, card)
+		}
 	}
 }
 
@@ -52,6 +56,9 @@ func getDevice(id string, h *hass.Access) (hass.Device, error) {
 }
 
 func makeEntity(e hass.State, h *hass.Access) *widget.Card {
+	if e.State != "on" && e.State != "off" {
+		return nil
+	}
 	fmt.Printf("%s: (%s) %s\n", e.EntityID,
 		e.Attributes["friendly_name"],
 		e.State)
@@ -70,21 +77,23 @@ func makeEntity(e hass.State, h *hass.Access) *widget.Card {
 		dev.Toggle()
 	})
 
-	return widget.NewCard("", entityName, container.NewVBox(
+	card := widget.NewCard("", entityName, container.NewVBox(
 		container.NewHBox(entityButton),
 	))
+
+	card.Refresh()
+
+	return card
 }
 
 func loadSavedData(a fyne.App, w fyne.Window, input *widget.Entry, file string) {
 	uri, err := storage.Child(a.Storage().RootURI(), file)
 	if err != nil {
-		dialog.ShowError(err, w)
 		return
 	}
 
 	reader, err := storage.Reader(uri)
 	if err != nil {
-		dialog.ShowError(err, w)
 		return
 	}
 	defer reader.Close()
@@ -146,7 +155,7 @@ func main() {
 
 	h := hass.NewAccess(urlEntry.Text, "")
 	if haExists && tkExists {
-		if certExists {
+		if certExists && certEntry.Text != "" {
 			rootCAs, _ := x509.SystemCertPool()
 			if rootCAs == nil {
 				rootCAs = x509.NewCertPool()
@@ -197,17 +206,15 @@ func main() {
 		w.Hide()
 	})
 
+	cols := 5
 	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("Lights",
 			theme.VisibilityIcon(),
-			container.NewVBox(
-				container.NewAdaptiveGrid(3, lightCards...),
-			)),
+			container.NewAdaptiveGrid(cols, lightCards...),
+		),
 		container.NewTabItemWithIcon("Switches",
 			theme.RadioButtonIcon(),
-			container.NewVBox(
-				container.NewAdaptiveGrid(3, switchCards...),
-			),
+			container.NewAdaptiveGrid(cols, switchCards...),
 		),
 	)
 	tabs.SetTabLocation(container.TabLocationLeading)

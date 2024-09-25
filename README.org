@@ -1,0 +1,6 @@
+#+TITLE: fass
+
+A simple [[https://fyne.io/][Fyne]] app for controlling lights and switches in your  [[https://www.home-assistant.io/][Home Assistant]]
+install.
+
+[[file:toggleswitch.png]]
