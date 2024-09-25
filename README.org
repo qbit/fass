@@ -3,8 +3,8 @@
 A simple [[https://fyne.io/][Fyne]] app for controlling lights and switches in your  [[https://www.home-assistant.io/][Home Assistant]]
 install.
 
-#+attr_html: :width 100px
-#+ATTR_ORG: :width 100px
+#+attr_html: :width 64px
+#+ATTR_ORG: :width 64px
 [[file:toggleswitch.png]]
 
 
