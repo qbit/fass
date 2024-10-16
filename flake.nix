@@ -26,7 +26,7 @@
             version = "v0.0.0";
             src = ./.;
 
-            vendorHash = "sha256-gyY6JQn2r23Gwh0Dop5BoBT7TbZIxM2Ed+sC+yqTzDQ=";
+            vendorHash = "sha256-XfbdYMNP/cq0XQDpJSvEpQoLg9oNc88LxJyFJ2c8iXM=";
 
             nativeBuildInputs = [ pkg-config copyDesktopItems ];
             buildInputs = [
