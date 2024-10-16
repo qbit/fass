@@ -1,12 +1,15 @@
 package main
 
 import (
+	"cmp"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"slices"
+	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -20,6 +23,18 @@ import (
 	"github.com/pawal/go-hass"
 )
 
+func sortEntries(entries *hass.States) {
+	slices.SortFunc(*entries, func(a hass.State, b hass.State) int {
+		an := fmt.Sprintf("%s", a.Attributes["friendly_name"])
+		bn := fmt.Sprintf("%s", b.Attributes["friendly_name"])
+
+		if n := strings.Compare(an, bn); n != 0 {
+			return n
+		}
+		return cmp.Compare(a.EntityID, b.EntityID)
+	})
+}
+
 func loadData(h *hass.Access, lightCards *[]fyne.CanvasObject, switchCards *[]fyne.CanvasObject) {
 	lights, err := h.FilterStates("light")
 	if err != nil {
@@ -29,6 +44,9 @@ func loadData(h *hass.Access, lightCards *[]fyne.CanvasObject, switchCards *[]fy
 	if err != nil {
 		log.Fatalln(err)
 	}
+
+	sortEntries(&lights)
+	sortEntries(&switches)
 
 	for entity := range lights {
 		e := lights[entity]
