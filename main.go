@@ -1,7 +1,6 @@
 package main
 
 import (
-	"cmp"
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
@@ -31,7 +30,7 @@ func sortEntries(entries *hass.States) {
 		if n := strings.Compare(an, bn); n != 0 {
 			return n
 		}
-		return cmp.Compare(a.EntityID, b.EntityID)
+		return strings.Compare(a.EntityID, b.EntityID)
 	})
 }
 
